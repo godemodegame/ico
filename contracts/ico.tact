@@ -2,12 +2,12 @@ import "@stdlib/deploy";
 import "@stdlib/ownable";
 import "./messages"; // https://github.com/ton-core/tact/blob/main/stdlib/libs/jetton/messages.tact
 
-contract Ico with Deployable, Ownable {
+contract Ico with Deployable, OwnableTransferable {
 
     // MARK: Variables
 
     // Wallet to receive jettons;
-    jettonWallet: Address;
+    jettonWallet: Address?;
     // Total amount of jettons received, default is 0
     amount: Int as coins;
     // Amount of ton per 1 * 10^9 jetton
@@ -17,8 +17,7 @@ contract Ico with Deployable, Ownable {
     // Owner of the contract
     owner: Address;
 
-    init(jettonWallet: Address, rate: Int) {
-        self.jettonWallet = jettonWallet;
+    init(rate: Int) {
         self.rate = rate;
 
         self.amount = 0;
@@ -33,7 +32,7 @@ contract Ico with Deployable, Ownable {
         if self.amount > 0 {
             send( // send jettons
                 SendParameters{
-                    to: self.jettonWallet,
+                    to: self.jettonWallet!!,
                     value: 0,
                     mode: SendRemainingValue + SendIgnoreErrors,
                     bounce: false,
@@ -61,7 +60,7 @@ contract Ico with Deployable, Ownable {
     }
 
     receive(msg: TokenNotification) {
-        require(self.jettonWallet == sender(), "unknown jetton wallet");
+        require(self.jettonWallet == sender(), "Unknown jetton wallet");
         self.amount = self.amount + msg.amount;
 
         self.reply(
@@ -70,16 +69,22 @@ contract Ico with Deployable, Ownable {
         );
     }
 
+    receive(msg: ChangeJettonWallet) {
+        self.requireOwner();
+        self.jettonWallet = msg.address;
+    }
+
     // Buy jettons
     receive() {
-        require(context().value > ton("0.1"), "amount is too small");
+        require(self.jettonWallet != null, "No jettons on sale");
+        require(context().value > ton("0.1"), "Amount is too small");
         let jettonAmount: Int = (context().value - ton("0.1")) * self.rate;
-        require(jettonAmount > self.amount, "not enough jettons");
+        require(jettonAmount > self.amount, "Not enough jettons");
         self.amount = self.amount - jettonAmount;
         self.soldAmount = self.soldAmount + jettonAmount;
         send(
             SendParameters{
-                to: self.jettonWallet,
+                to: self.jettonWallet!!,
                 value: 0,
                 mode: SendRemainingValue + SendIgnoreErrors,
                 body: TokenTransfer{
@@ -111,6 +116,10 @@ contract Ico with Deployable, Ownable {
 
     get fun rate(): Int {
         return self.rate;
+    }
+
+    get fun jettonWallet(): Address? {
+        return self.jettonWallet;
     }
 
     // MARK: Private Methods

@@ -1,0 +1,27 @@
+const int workchain = 0;
+const int base_forward_ton_amount = 1000000;
+const int min_initialization_gas = 200000000;
+
+const int resolver_code_hash = 1;
+;; const int wallet_code_hash = 1;
+
+const int op::transfer = 0xf8a7ea5;
+const int op::internal_transfer = 0x178d4519;
+const int op::burn = 0x595f07bc;
+const int op::transfer_notification = 0x7362d09c;
+const int op::burn_notification = 0x7bdd97de;
+const int op::excesses = 0xd53276db;
+
+const int op::provide_wallet_address = 0x2c76b973;
+const int op::take_wallet_address = 0xd1735400;
+
+const int error::invalid_op = 72;
+const int error::not_owner = 73;
+const int error::not_valid_wallet = 74;
+const int error::wrong_workchain = 333;
+const int error::no_gas = 419;
+const int error::invalid_param = 420;
+const int error::wrong_op = 0xffff;
+
+const int error::balance_error = 47;
+const int error::not_enough_gas = 48;

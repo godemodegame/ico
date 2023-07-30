@@ -1,4 +1,8 @@
-// ===== TEP64 Standard: Jetton Messages ===== // 
+message ChangeJettonWallet {
+    address: Address;
+}
+
+// MARK: TEP64 Standard: Jetton Messages
 message(0xf8a7ea5) TokenTransfer {
     queryId: Int as uint64;
     amount: Int as coins;
